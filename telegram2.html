@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviar a Telegram</title>
+</head>
+<body>
+    <h1>Enviar a Telegram</h1>
+
+    <form id="telegramForm">
+        <!-- Selección de imagen/video -->
+        <label for="fileInput">Selecciona imagen o video:</label>
+        <input type="file" id="fileInput" accept="image/*,video/*"><br><br>
+
+        <!-- Enviar texto -->
+        <label for="message">Escribe un mensaje:</label><br>
+        <textarea id="message" rows="4" cols="50" placeholder="Escribe aquí tu mensaje..."></textarea><br><br>
+
+        <button type="button" onclick="sendToTelegram()">Enviar Todo</button>
+    </form>
+
+    <script>
+        const chatId = "1617751854";
+        const botToken = "7942913397:AAH7v5CiM27nKvV7IsK3T3TRnE-LJm5doQ0";
+
+        // Función principal para enviar texto y archivo
+        async function sendToTelegram() {
+            const message = document.getElementById("message").value;
+            const fileInput = document.getElementById("fileInput").files[0];
+
+            try {
+                // 1. Enviar texto si existe
+                if (message.trim()) {
+                    const textResponse = await sendText(message);
+                    if (!textResponse.ok) throw new Error("Error al enviar el mensaje.");
+                }
+
+                // 2. Enviar archivo si existe
+                if (fileInput) {
+                    const fileResponse = await sendFile(fileInput);
+                    if (!fileResponse.ok) throw new Error("Error al enviar el archivo.");
+                }
+
+                alert("Datos enviados correctamente a Telegram.");
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Ocurrió un error al enviar los datos.");
+            }
+        }
+
+        // Función para enviar texto
+        async function sendText(message) {
+            return await fetch(https://api.telegram.org/bot${botToken}/sendMessage, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, text: message })
+            });
+        }
+
+        // Función para enviar archivo
+        async function sendFile(file) {
+            const formData = new FormData();
+            formData.append(file.type.startsWith("image") ? "photo" : "video", file);
+            formData.append("chat_id", chatId);
+
+            return await fetch(https://api.telegram.org/bot${botToken}/send${file.type.startsWith("image") ? "Photo" : "Video"}, {
+                method: "POST",
+                body: formData
+            });
+        }
+    </script>
+</body>
+</html>

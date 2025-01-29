@@ -6,27 +6,27 @@
     <title>Enviar Imagen y Texto a Telegram</title>
 </head>
 <body>
-    <h1>Enviar Imagen y Texto a Telegram</h1>
+    <h1></h1>
     
-    <!-- Formulario para la imagen -->
+
     <form id="upload-form" enctype="multipart/form-data">
-        <label for="file-input">Selecciona una imagen:</label>
+        <label for="file-input">Seleccione archivo:</label>
         <input type="file" id="file-input" accept="image/*">
         <button type="submit">Enviar Imagen</button>
     </form>
 
     <br>
 
-    <!-- Área de texto para el mensaje -->
+   
     <form id="text-form">
         <label for="text-input">Escribe un mensaje:</label>
         <textarea id="text-input" rows="4" cols="50" placeholder="Escribe tu mensaje aquí..."></textarea>
         <br>
-        <button type="submit">Enviar Mensaje</button>
+        <button type="submit">Enviar</button>
     </form>
 
     <script>
-        // Enviar imagen
+    
         document.getElementById('upload-form').addEventListener('submit', function(event) {
             event.preventDefault();
 
@@ -39,8 +39,8 @@
             }
 
             var formData = new FormData();
-            formData.append("chat_id", "1617751854");  // Reemplaza con tu chat_id
-            formData.append("photo", file);  // Agrega el archivo como 'photo'
+            formData.append("chat_id", "1617751854");  
+            formData.append("photo", file);  
 
             fetch("https://api.telegram.org/bot7942913397:AAH7v5CiM27nKvV7IsK3T3TRnE-LJm5doQ0/sendPhoto", {
                 method: "POST",
@@ -49,7 +49,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.ok) {
-                    alert("¡Imagen enviada exitosamente!");
+                    alert("Archivo enviado exitosamente");
                 } else {
                     alert("Hubo un error al enviar la imagen.");
                 }
@@ -59,7 +59,7 @@
             });
         });
 
-        // Enviar texto
+        
         document.getElementById('text-form').addEventListener('submit', function(event) {
             event.preventDefault();
 
@@ -72,8 +72,8 @@
             }
 
             var formData = new FormData();
-            formData.append("chat_id", "1617751854");  // Reemplaza con tu chat_id
-            formData.append("text", message);  // Agrega el mensaje como 'text'
+            formData.append("chat_id", "1617751854");  
+            formData.append("text", message);  
 
             fetch("https://api.telegram.org/bot7942913397:AAH7v5CiM27nKvV7IsK3T3TRnE-LJm5doQ0/sendMessage", {
                 method: "POST",
@@ -82,10 +82,10 @@
             .then(response => response.json())
             .then(data => {
                 if (data.ok) {
-                    alert("¡Mensaje enviado exitosamente!");
-                    textInput.value = '';  // Limpiar el área de texto después de enviar
+                    alert("Mensaje enviado exitosamente");
+                    textInput.value = '';  
                 } else {
-                    alert("Hubo un error al enviar el mensaje.");
+                    alert("error al enviar el mensaje");
                 }
             })
             .catch(error => {

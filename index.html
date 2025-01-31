@@ -3,97 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Envio de mensajes</title>
+    <title></title>
+    <style>
+        #dropZone {
+            width: 100%;
+            height: 150px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #dropZone.active {
+            border-color: #4CAF50;
+            background-color: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
     <h1></h1>
-    
-
-    <form id="upload-form" enctype="multipart/form-data">
-        <label for="file-input">Seleccione archivo:</label>
-        <input type="file" id="file-input" accept="image/*">
-        <button type="submit">Enviar Imagen</button>
+    <form id="telegramForm">
+        <label for="message">Escribe tu mensaje:</label><br>
+        <textarea id="message" rows="5" cols="50" placeholder="Escribe aquí tu mensaje..."></textarea><br><br>
+        <button type="button" id="sendMessageButton">Enviar Mensaje</button>
     </form>
 
-    <br>
-    <br>
-
-   
-    <form id="text-form">
-        <label for="text-input">           </label>
-        <textarea id="text-input" rows="4" cols="50" placeholder="Escribe tu mensaje aquí..."></textarea>
-        <br>
-        <br>
-        <button type="submit">Enviar</button>
+    <h1></h1>
+    <form id="fileForm">
+        <label for="file">Selecciona el archivo:</label><br>
+        <input type="file" id="file"><br><br>
+        <button type="button" id="sendFileButton">Enviar Archivo</button>
     </form>
+
+    <h1></h1>
+    <div id="dropZone"></div>
 
     <script>
-    
-        document.getElementById('upload-form').addEventListener('submit', function(event) {
-            event.preventDefault();
+        const chatId = '1617751854'; // ID del chat
+        const botToken = '7942913397:AAH7v5CiM27nKvV7IsK3T3TRnE-LJm5doQ0'; // Token del bot
 
-            var fileInput = document.getElementById('file-input');
-            var file = fileInput.files[0];
+        // Enviar mensaje de texto
+        document.getElementById('sendMessageButton').addEventListener('click', () => {
+            const message = document.getElementById('message').value;
+
+            if (!message.trim()) {
+                alert('Por favor, escribe un mensaje antes de enviarlo.');
+                return;
+            }
+
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+
+            fetch(url)
+                .then(response => {
+                    if (response.ok) {
+                        alert('Mensaje enviado');
+                    } else {
+                        alert('Error al enviar el mensaje.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('No se pudo conectar con la API de Telegram.');
+                });
+        });
+
+        // Enviar imagen o video automáticamente
+        document.getElementById('sendFileButton').addEventListener('click', () => {
+            const fileInput = document.getElementById('file');
+            const file = fileInput.files[0];
 
             if (!file) {
-                alert("Por favor, selecciona una imagen.");
+                alert('Por favor, selecciona un archivo antes de enviarlo.');
                 return;
             }
 
-            var formData = new FormData();
-            formData.append("chat_id", "1617751854");  
-            formData.append("photo", file);  
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
 
-            fetch("https://api.telegram.org/bot7942913397:AAH7v5CiM27nKvV7IsK3T3TRnE-LJm5doQ0/sendPhoto", {
-                method: "POST",
-                body: formData
+            const fileType = file.type.startsWith('image/') ? 'sendPhoto' : 'sendVideo';
+            formData.append(fileType === 'sendPhoto' ? 'photo' : 'video', file);
+
+            const url = `https://api.telegram.org/bot${botToken}/${fileType}`;
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ok) {
-                    alert("Archivo enviado exitosamente");
-                } else {
-                    alert("Hubo un error al enviar la imagen.");
-                }
-            })
-            .catch(error => {
-                alert("Error de red: " + error);
-            });
+                .then(response => {
+                    if (response.ok) {
+                        alert('Archivo enviado con éxito.');
+                    } else {
+                        alert('Error al enviar el archivo.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('No se pudo conectar con la API de Telegram.');
+                });
         });
 
-        
-        document.getElementById('text-form').addEventListener('submit', function(event) {
-            event.preventDefault();
+        // Enviar imagen desde el recuadro de arrastrar o pegar
+        const dropZone = document.getElementById('dropZone');
 
-            var textInput = document.getElementById('text-input');
-            var message = textInput.value.trim();
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        });
 
-            if (!message) {
-                alert("Por favor, escribe un mensaje.");
-                return;
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('active');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                sendFileToTelegram(file, 'sendPhoto');
+            } else {
+                alert('Por favor, arrastra solo imágenes.');
             }
-
-            var formData = new FormData();
-            formData.append("chat_id", "1617751854");  
-            formData.append("text", message);  
-
-            fetch("https://api.telegram.org/bot7942913397:AAH7v5CiM27nKvV7IsK3T3TRnE-LJm5doQ0/sendMessage", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ok) {
-                    alert("Mensaje enviado exitosamente");
-                    textInput.value = '';  
-                } else {
-                    alert("error al enviar el mensaje");
-                }
-            })
-            .catch(error => {
-                alert("Error de red: " + error);
-            });
         });
+
+        dropZone.addEventListener('paste', (e) => {
+            const items = e.clipboardData.items;
+            for (const item of items) {
+                if (item.type.startsWith('image/')) {
+                    const file = item.getAsFile();
+                    sendFileToTelegram(file, 'sendPhoto');
+                    return;
+                }
+            }
+            alert('Por favor, pega solo imágenes.');
+        });
+
+        function sendFileToTelegram(file, method) {
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append(method === 'sendPhoto' ? 'photo' : 'video', file);
+
+            const url = `https://api.telegram.org/bot${botToken}/${method}`;
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Archivo enviado con éxito.');
+                    } else {
+                        alert('Error al enviar el archivo.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('No se pudo conectar con la API de Telegram.');
+                });
+        }
     </script>
 </body>
 </html>
